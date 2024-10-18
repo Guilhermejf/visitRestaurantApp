@@ -1,15 +1,33 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import { initializeDB } from './src/database/initializeDB';
+import { getAllDate, insertDate } from './src/database/visitsRepository';
 
 export default function App() {
 
-  const [markedDates, setMarkedDates] = useState({
-    '2024-10-03': { selected: true, marked: true, selectedColor: 'green' },
-    '2024-10-18': { selected: true, marked: true, selectedColor: 'green' }
-  });
+  const [markedDates, setMarkedDates] = useState({});
+  const [upCalendar, setUpCalendar] = useState(false)
 
+  useEffect(() => {
+    async function initDB() {
+      initializeDB()
+    }
+    initDB()
+  }, [])
+
+  useEffect(() => {
+    async function preencheDatas() {
+      const DATAS = {}
+      const datas = await getAllDate()
+      datas.forEach((value) => {
+        DATAS[value.date] = { selected: true, marked: true, selectedColor: 'green' };
+      })
+      setMarkedDates(DATAS)
+    }
+    preencheDatas()
+  }, [upCalendar])
 
   function registerNow() {
     let date = new Date()
@@ -19,12 +37,17 @@ export default function App() {
 
     const usadate = `${year}-${month}-${day}`
     console.log(usadate)
+    insertDate(usadate)
+    setUpCalendar(!upCalendar)
   }
 
-  function quantRef(){
+  function deleteData(day) {
+    console.log("Dia a ser deletado.: ", day)
+  }
+
+  function quantRef() {
     return Object.keys(markedDates).length
   }
-
 
   return (
     <View style={styles.container}>
@@ -35,7 +58,7 @@ export default function App() {
 
       <View style={styles.body} >
         <View style={styles.calendarContainer} >
-          <Calendar onDayPress={(daySelect)=>console.log(daySelect)}
+          <Calendar onDayPress={(daySelect) => deleteData(daySelect.dateString)}
             markedDates={markedDates}
           >
           </Calendar>
