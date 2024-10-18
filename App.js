@@ -1,10 +1,57 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Calendar } from 'react-native-calendars';
 
 export default function App() {
+
+  const [markedDates, setMarkedDates] = useState({
+    '2024-10-03': { selected: true, marked: true, selectedColor: 'green' },
+    '2024-10-18': { selected: true, marked: true, selectedColor: 'green' }
+  });
+
+
+  function registerNow() {
+    let date = new Date()
+    const day = date.getDate()
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+
+    const usadate = `${year}-${month}-${day}`
+    console.log(usadate)
+  }
+
+  function quantRef(){
+    return Object.keys(markedDates).length
+  }
+
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+      <View style={styles.containerTitle} >
+        <Text style={styles.title} >Registro Refeição</Text>
+        <Text style={styles.icon}>🍽</Text>
+      </View>
+
+      <View style={styles.body} >
+        <View style={styles.calendarContainer} >
+          <Calendar onDayPress={(daySelect)=>console.log(daySelect)}
+            markedDates={markedDates}
+          >
+          </Calendar>
+        </View>
+        <View style={styles.controlContainer} >
+          <Text style={styles.count} >🍴 x {quantRef()} </Text>
+          <View style={styles.control} >
+            <TouchableOpacity onPress={() => registerNow()} >
+              <Text style={styles.icon2} >
+                👍
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+      </View>
       <StatusBar style="auto" />
     </View>
   );
@@ -17,4 +64,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  containerTitle: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: 35,
+    marginBottom: 15,
+    width: "100%",
+    height: '10%',
+    backgroundColor: 'black',
+  },
+  icon: {
+    fontSize: 55,
+  },
+  icon2: {
+    fontSize: 100,
+  },
+  body: {
+    width: '100%',
+    flexGrow: 1,
+  },
+  title: {
+    fontWeight: 'bold',
+    color: '#FFF',
+    fontSize: 35,
+  },
+  calendarContainer: {
+    height: 300,
+    width: '95%',
+    alignSelf: "center",
+    borderRadius: 10,
+  },
+  controlContainer: {
+
+    flexGrow: 1,
+  },
+  count: {
+    height: 45,
+    borderRadius: 10,
+    color: "#FFF",
+    backgroundColor: "black",
+    margin: 10,
+    textAlign: 'right',
+    fontSize: 30,
+    paddingHorizontal: 10,
+  },
+  control: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
