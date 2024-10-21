@@ -9,8 +9,7 @@ export async function initializeDB(params) {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             date DATE NOT NULL UNIQUE
             );            `
-        )   
-        console.log(result)     
+        )    
     } catch (error) {
         console.error(error)
     }
