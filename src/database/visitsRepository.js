@@ -17,6 +17,12 @@ export async function getAllDate() {
     return(result)
 }
 
+export async function getMonth(year,month) {
+    const db = await SQLite.openDatabaseAsync('myBase.db')
+    const result = await db.getAllAsync('SELECT * FROM visits WHERE date like ?',`${year}-${month}%`)
+    return(result)
+}
+
 export async function getDateSelected(date) {
     const db = await SQLite.openDatabaseAsync('myBase.db')
     const result = await db.getFirstAsync('SELECT * FROM visits WHERE date = ?',date)

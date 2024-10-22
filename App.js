@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { initializeDB } from './src/database/initializeDB';
-import { delDate, getAllDate, getDateSelected, insertDate } from './src/database/visitsRepository';
+import { delDate, getAllDate, getDateSelected, getMonth, insertDate } from './src/database/visitsRepository';
 
 export default function App() {
 
   const [markedDates, setMarkedDates] = useState({});
   const [upCalendar, setUpCalendar] = useState(false)
+  const [monthCalendar, setMonthCalendar] = useState(0)
   useEffect(() => {
     async function initDB() {
       initializeDB()
@@ -19,61 +20,82 @@ export default function App() {
   useEffect(() => {
     async function preencheDatas() {
       const DATAS = {}
-      const datas = await getAllDate()
+      let datas = [] 
+        if(monthCalendar == 0){
+          datas = await getMonth(getToday('year'),getToday('month'))
+        }else{
+          datas = await getMonth(getToday('year'),monthCalendar)
+        }
+    
       datas.forEach((value) => {
         DATAS[value.date] = { selected: true, marked: true, selectedColor: 'green' };
       })
       setMarkedDates(DATAS)
     }
     preencheDatas()
-  }, [upCalendar])
+  }, [upCalendar,monthCalendar])
 
-  async function handleDelDate(id){
+   async function handleDelDate(id) {
     await delDate(id)
     setUpCalendar(!upCalendar)
   }
 
-  async function registerNow(dateParameter) {
-    
+  function getToday(part) {
     let date = new Date()
     const day = date.getDate()
     const year = date.getFullYear()
     const month = date.getMonth() + 1
-    const usadate = `${year}-${month}-${day}`
-    
-    if(dateParameter == null){
-      const existe = await getDateSelected(usadate)
-      if(existe == false){
-        insertDate(usadate)
-      }else{
-        Alert.alert("","Hoje ja está marcado.")
+
+    if (part == "year") {
+      return year
+    } else if (part == 'day') {
+      return day
+    } else if (part == 'month') {
+      return month
+    } else {
+      return `${year}-${month}-${day}`
+    }
+
+  }
+
+  async function registerNow(dateParameter) {
+
+    const today = getToday()
+
+    if (dateParameter == null) {
+      const existe = await getDateSelected(today)
+      if (existe == false) {
+        insertDate(today)
+      } else {
+        Alert.alert("", "Hoje ja está marcado.")
       }
-    }else{
+    } else {
       insertDate(dateParameter)
 
     }
     setUpCalendar(!upCalendar)
   }
 
-  async function handleSelectDate(date){
+  async function handleSelectDate(date) {
     const result = await getDateSelected(date)
-    if(result !== false){
-      Alert.alert("Deseja exluir marcação ?",'',[
+    if (result !== false) {
+      Alert.alert("Deseja exluir marcação ?", '', [
         {
-          text:'Sim',
-          onPress: ()=>handleDelDate(result)
+          text: 'Sim',
+          onPress: () => handleDelDate(result)
         },
         {
-          text:'Não'
+          text: 'Não'
         }
       ]
-    )
-    }else(
-      Alert.alert("Marcar data,",`Deseja marcar o dia ${date.slice(8,10)} ?`,[
-        {text: "Sim",
-          onPress: ()=>registerNow(date)
-        },{
-          text:'Não'
+      )
+    } else (
+      Alert.alert("Marcar data,", `Deseja marcar o dia ${date.slice(8, 10)} ?`, [
+        {
+          text: "Sim",
+          onPress: () => registerNow(date)
+        }, {
+          text: 'Não'
         }
       ])
     )
@@ -93,7 +115,7 @@ export default function App() {
 
       <View style={styles.body} >
         <View style={styles.calendarContainer} >
-          <Calendar enableSwipeMonths={true} onMonthChange={(select)=>console.log(select.month)} onDayLongPress={(daySelect) => handleSelectDate(daySelect.dateString)}
+          <Calendar enableSwipeMonths={true} onMonthChange={(select) => setMonthCalendar(select.month)} onDayLongPress={(daySelect) => handleSelectDate(daySelect.dateString)}
             markedDates={markedDates}
           >
           </Calendar>
